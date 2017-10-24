@@ -1,53 +1,34 @@
 package com.example.meter.aggregator.generator;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
 
 import com.example.meter.aggregator.domain.ElectricityMeasure;
+import reactor.core.publisher.Flux;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class ElectricityMeasureGenerator {
 
-	private final Random random = new Random();
+	private final Map<String, ZoneInfo> zones;
 
-	private final Map<String, Zone> zones;
-
-	private final List<String> zoneIds;
-
-	public ElectricityMeasureGenerator(Map<String, Zone> zones) {
-		this.zones = Collections.unmodifiableMap(new LinkedHashMap<>(zones));
-		this.zoneIds = new ArrayList<>(this.zones.keySet());
+	public ElectricityMeasureGenerator(ElectricityMeasureGeneratorProperties properties) {
+		this.zones = extractConfiguration(properties);
 	}
 
-	public ElectricityMeasure generateMeasure() {
-		String zoneId = randomZoneId();
-		long timestamp = generateTimestamp();
-		return new ElectricityMeasure(UUID.randomUUID().toString(), zoneId, timestamp,
-				randomPower(zoneId));
+	public Map<String, Flux<ElectricityMeasure>> generateSensorData() {
+		Map<String, Flux<ElectricityMeasure>> content = new HashMap<>();
+		this.zones.forEach((id, zone) -> content.put(id, new ElectricityMeasureFluxGenerator(zone).sensorData()));
+		return content;
 	}
 
-	private String randomZoneId() {
-		return this.zoneIds.get(this.random.nextInt(this.zoneIds.size()));
-	}
 
-	private long generateTimestamp() {
-		LocalDateTime now = LocalDateTime.now();
-		int mod = now.getSecond() % 15;
-		return now.withSecond(now.getSecond() + (mod < 8 ? -mod : (15 - mod)))
-				.withNano(0)
-				.toInstant(ZoneOffset.UTC).toEpochMilli();
+	private static Map<String, ZoneInfo> extractConfiguration(
+			ElectricityMeasureGeneratorProperties properties) {
+		Map<String, ZoneInfo> zones = new HashMap<>();
+		properties.getZones().forEach((id, zone) -> zones.put(id,
+				new ZoneInfo(id, zone.getDevicesCount(), zone.getPowerLow(), zone.getPowerHigh())));
+		return zones;
 	}
-
-	private float randomPower(String zoneId) {
-		Zone zone = zones.get(zoneId);
-		float delta = zone.getPowerHigh() - zone.getPowerLow();
-		return zone.getPowerLow() + (this.random.nextFloat() * delta);
-	}
-
 }
