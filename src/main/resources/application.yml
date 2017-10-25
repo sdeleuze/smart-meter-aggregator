@@ -1,0 +1,16 @@
+endpoints:
+  default:
+    web:
+      enabled: true
+meter:
+  aggregator:
+    generator:
+      zones:
+        one:
+          devicesCount: 50
+        two:
+          devicesCount: 60
+        three:
+          devicesCount: 20
+          powerLow: 4000
+          powerHigh: 6000
