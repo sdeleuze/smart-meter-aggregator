@@ -7,6 +7,7 @@ import com.example.meter.aggregator.domain.ElectricityMeasure;
 import reactor.core.publisher.Flux;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 @Component
 public class ElectricityMeasureGenerator {
@@ -23,6 +24,11 @@ public class ElectricityMeasureGenerator {
 		return content;
 	}
 
+	public void updatePowerRangeFor(String zoneId, Float powerLow, Float powerHigh) {
+		ZoneInfo zoneInfo = this.zones.get(zoneId);
+		Assert.notNull(zoneInfo, "Zone with id " + zoneId + " does not exist");
+		zoneInfo.updatePowerRange(powerLow, powerHigh);
+	}
 
 	private static Map<String, ZoneInfo> extractConfiguration(
 			ElectricityMeasureGeneratorProperties properties) {

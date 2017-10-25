@@ -14,15 +14,12 @@ class ZoneInfo {
 
 	private int devicesCount;
 
-	private float powerLow;
-
-	private float powerHigh;
+	private PowerRange powerRange;
 
 	public ZoneInfo(String zoneId, int devicesCount, float powerLow, float powerHigh) {
 		this.zoneId = zoneId;
 		this.devicesCount = devicesCount;
-		this.powerLow = powerLow;
-		this.powerHigh = powerHigh;
+		this.powerRange = new PowerRange(powerLow, powerHigh);
 	}
 
 	public String getZoneId() {
@@ -33,8 +30,34 @@ class ZoneInfo {
 		return this.devicesCount;
 	}
 
+	public void updatePowerRange(Float powerLow, Float powerHigh) {
+		float effectivePowerLow = (powerLow != null ? powerLow
+				: this.powerRange.powerLow);
+		float effectivePowerHigh = (powerHigh != null ? powerHigh
+				: this.powerRange.powerHigh);
+		this.powerRange = new PowerRange(effectivePowerLow, effectivePowerHigh);
+	}
+
 	public float randomPower() {
-		float delta = this.powerHigh - this.powerLow;
-		return this.powerLow + (random.nextFloat() * delta);
+		PowerRange powerRange = this.powerRange;
+		return powerRange.randomPower();
+	}
+
+	private static class PowerRange {
+
+		private final float powerLow;
+
+		private final float powerHigh;
+
+		PowerRange(float powerLow, float powerHigh) {
+			this.powerLow = powerLow;
+			this.powerHigh = powerHigh;
+		}
+
+		float randomPower() {
+			float delta = this.powerHigh - this.powerLow;
+			return this.powerLow + (random.nextFloat() * delta);
+		}
+
 	}
 }
