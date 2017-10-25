@@ -14,3 +14,5 @@ meter:
           devicesCount: 20
           powerLow: 4000
           powerHigh: 6000
+server:
+  port: 8081
