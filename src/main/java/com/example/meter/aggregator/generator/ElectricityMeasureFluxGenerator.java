@@ -42,10 +42,15 @@ class ElectricityMeasureFluxGenerator {
 
 	private long generateReportTimestamp() {
 		LocalDateTime now = LocalDateTime.now();
-		int mod = now.getSecond() % 15;
-		return now.withSecond(now.getSecond() + (mod < 8 ? -mod : (15 - mod)))
+		return now.withSecond(now.getSecond() + roundToQuarter(now.getSecond()))
 				.withNano(0)
 				.toInstant(ZoneOffset.UTC).toEpochMilli();
+	}
+
+	private int roundToQuarter(int second) {
+		int mod = second % 15;
+		int value = (mod < 8 ? -mod : (15 - mod));
+		return value != 60 ? value : 0;
 	}
 
 }
