@@ -21,7 +21,7 @@ class ElectricityMeasureHandler {
 
 	ElectricityMeasureHandler(ElectricityMeasureGenerator generator) {
 		this.content = generator.generateSensorData();
-		this.firehose = Flux.merge(content.values());
+		this.firehose = Flux.merge(content.values()).share();
 	}
 
 	public Mono<ServerResponse> firehose(ServerRequest request) {
