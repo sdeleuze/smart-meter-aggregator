@@ -3,9 +3,13 @@ package com.example.meter.aggregator.generator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.validation.constraints.Min;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 @ConfigurationProperties("meter.aggregator.generator")
+@Validated
 public class ElectricityMeasureGeneratorProperties {
 
 	private final Map<String, Zone> zones = new LinkedHashMap<>();
@@ -14,8 +18,10 @@ public class ElectricityMeasureGeneratorProperties {
 		return this.zones;
 	}
 
+	@Validated
 	public static class Zone {
 
+		@Min(10)
 		private int devicesCount = 50;
 
 		private float powerLow = 2000;
